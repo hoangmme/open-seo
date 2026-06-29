@@ -8,7 +8,7 @@ services:
       # Required for local Docker self-hosting: exposes Compose env vars to cloudflare:workers bindings.
       - CLOUDFLARE_INCLUDE_PROCESS_ENV=true
       - PORT=${PORT:-3001}
-      - ALLOWED_HOST=${ALLOWED_HOST:-}
+      - ALLOWED_HOST=${ALLOWED_HOST:-seo.mme.vn}
       - AUTH_MODE=local_noauth
       - DATAFORSEO_API_KEY=${DATAFORSEO_API_KEY}
       # Optional: Google Search Console. See
@@ -17,9 +17,21 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-}
       - VITE_SHOW_DEVTOOLS=false
-    ports:
-      - "${PORT:-3001}:${PORT:-3001}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.openseo.rule=Host(`seo.mme.vn`)"
+      - "traefik.http.routers.openseo.entrypoints=websecure"
+      - "traefik.http.routers.openseo.tls.certresolver=letsencrypt"
+      - "traefik.http.services.openseo.loadbalancer.server.port=3001"
+      - "traefik.docker.network=dokploy-network"
+    networks:
+      - dokploy-network
     volumes:
       - open_seo_data:/app/.wrangler
+
 volumes:
   open_seo_data:
+
+networks:
+  dokploy-network:
+    external: true
