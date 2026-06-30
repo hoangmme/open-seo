@@ -11,6 +11,10 @@ services:
       - ALLOWED_HOST=${ALLOWED_HOST:-seo.mme.vn}
       - AUTH_MODE=local_noauth
       - DATAFORSEO_API_KEY=${DATAFORSEO_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:-https://seo.mme.vn}
       - VITE_SHOW_DEVTOOLS=false
     labels:
       - "traefik.enable=true"
