@@ -1,5 +1,5 @@
 import { Autumn } from "autumn-js";
-import { getEnvValue } from "@/server/lib/runtime-env";
+import { env } from "cloudflare:workers";
 import { db } from "@/db";
 import { member, user } from "@/db/better-auth-schema";
 import { eq } from "drizzle-orm";
@@ -28,7 +28,7 @@ async function isCustomerApproved(customerId: string) {
       .where(eq(member.organizationId, customerId));
     
     const emails = rows.map(r => r.email);
-    const approvedEmailsStr = getEnvValue("APPROVED_EMAILS") || "admin@mme.com.vn,duylh220284@gmail.com";
+    const approvedEmailsStr = (env.APPROVED_EMAILS as string) || "admin@mme.com.vn,duylh220284@gmail.com";
     const approvedEmails = approvedEmailsStr.split(",").map(e => e.trim());
     
     return emails.some(e => approvedEmails.includes(e));
@@ -39,10 +39,10 @@ async function isCustomerApproved(customerId: string) {
 }
 
 export const autumn = new Proxy(new Autumn({
-  secretKey: () => getEnvValue("AUTUMN_SECRET_KEY") || "dummy",
+  secretKey: () => (env.AUTUMN_SECRET_KEY as string) || "dummy",
 }), {
   get(target, prop, receiver) {
-    if (!getEnvValue("AUTUMN_SECRET_KEY")) {
+    if (!env.AUTUMN_SECRET_KEY) {
       if (prop === "check" || prop === "track") {
         return async (args: { customerId: string }) => {
            if (await isCustomerApproved(args.customerId)) {
