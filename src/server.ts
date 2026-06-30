@@ -85,13 +85,16 @@ function fetch(
   const authMode = getAuthMode(env.AUTH_MODE);
   
   if (authMode === "local_noauth") {
-    const authHeader = request.headers.get("Authorization");
-    const expectedAuth = "Basic " + btoa("admin@mme.com.vn:namelessl4k3?1");
-    if (authHeader !== expectedAuth) {
-      return new Response("Unauthorized", {
-        status: 401,
-        headers: { "WWW-Authenticate": 'Basic realm="MMe SEO"' },
-      });
+    const pathname = new URL(request.url).pathname;
+    if (pathname !== "/mcp") {
+      const authHeader = request.headers.get("Authorization");
+      const expectedAuth = "Basic " + btoa("admin@mme.com.vn:namelessl4k3?1");
+      if (authHeader !== expectedAuth) {
+        return new Response("Unauthorized", {
+          status: 401,
+          headers: { "WWW-Authenticate": 'Basic realm="MMe SEO"' },
+        });
+      }
     }
   }
 
