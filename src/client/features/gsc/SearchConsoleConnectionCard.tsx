@@ -116,6 +116,7 @@ export function SearchConsoleConnectionCard({
         <SitePicker
           loading={sitesQuery.isLoading}
           error={sitesQuery.isError || requiresReconnect}
+          errorMessage={sitesQuery.error instanceof Error ? sitesQuery.error.message : undefined}
           sites={sitesQuery.data?.sites ?? []}
           selectedSiteUrl={selectedSiteUrl}
           onSelect={setSelectedSiteUrl}

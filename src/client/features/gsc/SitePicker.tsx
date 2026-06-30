@@ -22,6 +22,7 @@ type SecondaryAction = {
 export function SitePicker({
   loading,
   error,
+  errorMessage,
   sites,
   selectedSiteUrl,
   onSelect,
@@ -32,6 +33,7 @@ export function SitePicker({
 }: {
   loading: boolean;
   error: boolean;
+  errorMessage?: string;
   sites: SiteOption[];
   selectedSiteUrl: string;
   onSelect: (siteUrl: string) => void;
@@ -52,7 +54,7 @@ export function SitePicker({
     return (
       <div className="space-y-3">
         <p className="text-sm text-error">
-          Connection failed. Please reconnect and make sure to <strong>check all the permission boxes</strong> on the Google authorization screen!
+          {errorMessage || "Connection failed. Please reconnect and make sure to check all the permission boxes on the Google authorization screen!"}
         </p>
         <button
           type="button"

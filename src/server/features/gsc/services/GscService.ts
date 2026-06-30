@@ -99,6 +99,12 @@ async function listSitesForUserWithGrantStatus(
     return { sites: await listSitesForUser(userId), requiresReconnect: false };
   } catch (error) {
     console.error("GSC Grant Failure:", error);
+    
+    // If it's a 401 or 403 API error, throw it so the user sees the EXACT message!
+    if (error instanceof GscApiError) {
+      throw error;
+    }
+
     if (!isExpectedGrantFailure(error)) {
       throw error;
     }

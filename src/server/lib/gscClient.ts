@@ -84,7 +84,7 @@ export type UrlInspectionResult = {
 
 function messageForStatus(status: number, body: string): string {
   if (status === 401 || status === 403) {
-    return "Search Console denied access to this property (no verified permission, or the connection was revoked).";
+    return `Search Console denied access (${status}): ${body.slice(0, 300)}`;
   }
   if (status === 429) {
     return "Search Console rate limit reached. Retry shortly.";
