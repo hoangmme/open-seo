@@ -111,6 +111,7 @@ export function createGscClient(opts: { userId: string }) {
         body: { providerId: GSC_OAUTH_PROVIDER_ID, userId: opts.userId },
       });
     } catch (error) {
+      console.error("[gscClient] getAccessToken failed:", error);
       throw new GscTokenError(
         "Could not mint a Search Console access token (grant revoked or expired).",
         error,

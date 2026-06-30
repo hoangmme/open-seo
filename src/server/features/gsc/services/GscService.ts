@@ -98,6 +98,7 @@ async function listSitesForUserWithGrantStatus(
   try {
     return { sites: await listSitesForUser(userId), requiresReconnect: false };
   } catch (error) {
+    console.error("GSC Grant Failure:", error);
     if (!isExpectedGrantFailure(error)) {
       throw error;
     }

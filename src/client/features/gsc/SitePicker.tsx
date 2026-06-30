@@ -52,7 +52,7 @@ export function SitePicker({
     return (
       <div className="space-y-3">
         <p className="text-sm text-error">
-          Connection expired. Reconnect to continue.
+          Connection failed. Please reconnect and make sure to <strong>check all the permission boxes</strong> on the Google authorization screen!
         </p>
         <button
           type="button"
