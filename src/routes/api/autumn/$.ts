@@ -21,6 +21,20 @@ function handleAutumnRequest(request: Request) {
     });
   }
 
+  if (!env.AUTUMN_SECRET_KEY) {
+    const url = new URL(request.url);
+    if (url.pathname.endsWith("/getOrCreateCustomer")) {
+      return new Response(JSON.stringify({ customer: { id: "dummy", name: "Dummy" } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    return new Response(JSON.stringify({}), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
   return handler(request);
 }
 
