@@ -19,8 +19,8 @@ services:
       - "traefik.http.routers.openseo.tls.certresolver=letsencrypt"
       - "traefik.http.services.openseo.loadbalancer.server.port=3001"
       - "traefik.docker.network=dokploy-network"
-      # Basic Auth: admin / admin123
-      - "traefik.http.middlewares.openseo-auth.basicauth.users=admin:$$apr1$$H6s9.qJ7$$555l64FjIuI44O9c9b5.m/"
+      # Basic Auth
+      - "traefik.http.middlewares.openseo-auth.basicauth.users=admin@mme.com.vn:$$apr1$$Ye6CJ3X8$$abXUBg4sl2xlJz87zMVu6/"
       - "traefik.http.routers.openseo.middlewares=openseo-auth"
     networks:
       - dokploy-network
