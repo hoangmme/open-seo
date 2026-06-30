@@ -4,17 +4,19 @@ import { db } from "@/db";
 import { member, user } from "@/db/better-auth-schema";
 import { eq } from "drizzle-orm";
 
+const envAny = env as any;
+
 const dummyAutumn = {
-  check: async () => ({ allowed: true, balance: { remaining: 999999999 } }),
-  track: async () => ({}),
+  check: async (args?: any) => ({ allowed: true, balance: { remaining: 999999999 } }),
+  track: async (args?: any) => ({}),
   customers: {
     getOrCreate: async (args: any) => ({ id: args.customerId, name: "Dummy", email: args.email }),
   }
 };
 
 const lockedAutumn = {
-  check: async () => ({ allowed: false, balance: { remaining: 0 } }),
-  track: async () => ({}),
+  check: async (args?: any) => ({ allowed: false, balance: { remaining: 0 } }),
+  track: async (args?: any) => ({}),
   customers: {
     getOrCreate: async (args: any) => ({ id: args.customerId, name: "Dummy", email: args.email }),
   }
@@ -28,7 +30,7 @@ async function isCustomerApproved(customerId: string) {
       .where(eq(member.organizationId, customerId));
     
     const emails = rows.map(r => r.email);
-    const approvedEmailsStr = (env.APPROVED_EMAILS as string) || "admin@mme.com.vn,duylh220284@gmail.com";
+    const approvedEmailsStr = (envAny.APPROVED_EMAILS as string) || "admin@mme.com.vn,duylh220284@gmail.com";
     const approvedEmails = approvedEmailsStr.split(",").map(e => e.trim());
     
     return emails.some(e => approvedEmails.includes(e));
@@ -39,10 +41,10 @@ async function isCustomerApproved(customerId: string) {
 }
 
 export const autumn = new Proxy(new Autumn({
-  secretKey: () => (env.AUTUMN_SECRET_KEY as string) || "dummy",
+  secretKey: async () => (envAny.AUTUMN_SECRET_KEY as string) || "dummy",
 }), {
   get(target, prop, receiver) {
-    if (!env.AUTUMN_SECRET_KEY) {
+    if (!envAny.AUTUMN_SECRET_KEY) {
       if (prop === "check" || prop === "track") {
         return async (args: { customerId: string }) => {
            if (await isCustomerApproved(args.customerId)) {
