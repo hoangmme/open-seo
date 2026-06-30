@@ -18,14 +18,21 @@ services:
       - VITE_SHOW_DEVTOOLS=false
     labels:
       - "traefik.enable=true"
+      - "traefik.http.services.openseo.loadbalancer.server.port=3001"
+      - "traefik.docker.network=dokploy-network"
+      # Basic Auth middleware
+      - "traefik.http.middlewares.openseo-auth.basicauth.users=admin@mme.com.vn:$$apr1$$Ye6CJ3X8$$abXUBg4sl2xlJz87zMVu6/"
+      # Router 1: MCP endpoint - NO Basic Auth (MCP has its own auth)
+      - "traefik.http.routers.openseo-mcp.rule=Host(`seo.mme.vn`) && Path(`/mcp`)"
+      - "traefik.http.routers.openseo-mcp.entrypoints=websecure"
+      - "traefik.http.routers.openseo-mcp.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.openseo-mcp.priority=100"
+      # Router 2: Everything else - WITH Basic Auth
       - "traefik.http.routers.openseo.rule=Host(`seo.mme.vn`)"
       - "traefik.http.routers.openseo.entrypoints=websecure"
       - "traefik.http.routers.openseo.tls.certresolver=letsencrypt"
-      - "traefik.http.services.openseo.loadbalancer.server.port=3001"
-      - "traefik.docker.network=dokploy-network"
-      # Basic Auth
-      - "traefik.http.middlewares.openseo-auth.basicauth.users=admin@mme.com.vn:$$apr1$$Ye6CJ3X8$$abXUBg4sl2xlJz87zMVu6/"
       - "traefik.http.routers.openseo.middlewares=openseo-auth"
+      - "traefik.http.routers.openseo.priority=1"
     networks:
       - dokploy-network
     volumes:
