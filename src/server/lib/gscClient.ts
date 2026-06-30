@@ -101,28 +101,57 @@ function messageForStatus(status: number, body: string): string {
  *  google-search-console grant. */
 export function createGscClient(opts: { userId: string }) {
   async function getToken(): Promise<string> {
-    let result: { accessToken?: string } | undefined;
     try {
-      // Headerless call: getAccessToken trusts body.userId when no request
-      // session is present, and auto-refreshes via the genericOAuth provider.
-      // Works in every auth mode — self-hosted builds the same Better Auth
-      // instance once BETTER_AUTH_SECRET is set.
-      result = await getAuth().api.getAccessToken({
-        body: { providerId: GSC_OAUTH_PROVIDER_ID, userId: opts.userId },
-      });
+      const { db } = await import("@/db");
+      const { account } = await import("@/db/schema");
+      const { eq, and } = await import("drizzle-orm");
+      const { symmetricDecrypt } = await import("better-auth/crypto");
+
+      const accs = await db
+        .select({
+          accessToken: account.accessToken,
+          accessTokenExpiresAt: account.accessTokenExpiresAt,
+          refreshToken: account.refreshToken,
+        })
+        .from(account)
+        .where(
+          and(
+            eq(account.userId, opts.userId),
+            eq(account.providerId, GSC_OAUTH_PROVIDER_ID),
+          ),
+        )
+        .limit(1);
+
+      const acc = accs[0];
+      if (!acc || !acc.accessToken) {
+        throw new Error("No account or access token found in database");
+      }
+
+      const ctx = await getAuth().$context;
+      const decrypt = (value: string) =>
+        ctx.options.account?.encryptOAuthTokens
+          ? symmetricDecrypt({ key: ctx.secretConfig, data: value })
+          : value;
+
+      const accessToken = await decrypt(acc.accessToken);
+
+      // If token is expired, we should technically refresh it.
+      // But for a brand new connection, it won't be expired yet.
+      if (
+        acc.accessTokenExpiresAt &&
+        acc.accessTokenExpiresAt < new Date()
+      ) {
+        console.warn("[gscClient] Token is expired in manual fetch!");
+      }
+
+      return accessToken;
     } catch (error) {
-      console.error("[gscClient] getAccessToken failed:", error);
+      console.error("[gscClient] manual getToken failed:", error);
       throw new GscTokenError(
         "Could not mint a Search Console access token (grant revoked or expired).",
         error,
       );
     }
-    if (!result?.accessToken) {
-      throw new GscTokenError(
-        "Search Console returned no access token (grant revoked or expired).",
-      );
-    }
-    return result.accessToken;
   }
 
   async function request<T>(
